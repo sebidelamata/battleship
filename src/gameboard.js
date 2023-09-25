@@ -25,12 +25,12 @@ module.exports = class gameboard{
         }
         if(noseDirection == 'up'){
             for(let i=0; i<shipLength; i++){
-                this.board[noseColumn][noseRow + i] = 1;
+                this.board[noseRow + i][noseColumn] = 1;
             }
         }
         if(noseDirection == 'down'){
             for(let i=0; i<shipLength; i++){
-                this.board[noseColumn][noseRow - i] = 1;
+                this.board[noseRow - i][noseColumn] = 1;
             }
         }
     };
