@@ -81,4 +81,69 @@ describe("Gameboard", () => {
         testBoard.placeShip(2,1,1,"down");
         expect(testBoard.placeShip(2,2,1,"down")).toEqual('Can not place ship on top of another ship');
     });
+    test('can place multiple ships on the board', () => {
+        testBoard.placeShip(2,1,1,"down");
+        testBoard.placeShip(3,2,2,"down");
+        expect(testBoard.showBoard()).toEqual([
+            [0,1,1,0,0,0,0,0,0,0],
+            [0,1,1,0,0,0,0,0,0,0],
+            [0,0,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0]
+        ]);
+    });
+    test('determine if an attack hit a ship', () => {
+        testBoard.placeShip(2,1,1,"down");
+        testBoard.receiveAttack(1,1);
+        expect(testBoard.showBoard()).toEqual([
+            [0,1,0,0,0,0,0,0,0,0],
+            [0,2,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0]
+        ]);
+    });
+    test('sends the hit function to the correct ship', () => {
+        testBoard.placeShip(2,1,1,"down");
+        testBoard.placeShip(3,2,2,"down");
+        testBoard.receiveAttack(2,2);
+        expect(testBoard.getShipArray()[1].getHits()).toEqual(1);
+    });
+    test('records the coordinates of the missed shot', () => {
+        testBoard.placeShip(2,1,1,"down");
+        testBoard.placeShip(3,2,2,"down");
+        testBoard.receiveAttack(9,9);
+        expect(testBoard.showBoard()).toEqual([
+            [0,1,1,0,0,0,0,0,0,0],
+            [0,1,1,0,0,0,0,0,0,0],
+            [0,0,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,-1]
+        ]);
+    });
+    test('Gameboard reports if all ships have been sunk', () => {
+        testBoard.placeShip(2,1,1,"down");
+        testBoard.placeShip(3,2,2,"down");
+        testBoard.receiveAttack(1,1);
+        testBoard.receiveAttack(0,1);
+        testBoard.receiveAttack(2,2);
+        testBoard.receiveAttack(1,2);
+        testBoard.receiveAttack(0,2);
+        expect(testBoard.checkGameOver()).toBe(true);
+    });
 });
