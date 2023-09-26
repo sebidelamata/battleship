@@ -11,6 +11,15 @@ module.exports = class gameboard{
     }
 
     showBoard = () => {return this.board};
+
+    setSeaOfMissesTest = () => {
+        this.board = [];
+        for(let i=0; i<10; i++){
+            this.board.push([-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]);
+        }
+        this.board[0][0] = 0;
+    }
+
     getShipArray = () => {return this.shipArray};
     
     placeShip = (shipLength, noseRow, noseColumn, noseDirection) => {
