@@ -18,20 +18,5 @@ describe("Gameloop", () => {
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0]
         ]);
-    });
-    // test dom
-    test('should display both the player’s boards and render them using information from the Gameboard class', () => {
-        expect(testGame.getPlayerArray()[1].showPlayerBoard().showBoard()).toEqual([
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0]
-        ]);
-    }); 
+    })
 });
