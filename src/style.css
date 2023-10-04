@@ -87,3 +87,57 @@ body{
     transform: translate3d(0px, 0px, -250px);
   }
 }
+
+#greyout{
+    display: grid;
+    background-color: gray;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    opacity: 80%;
+    z-index: 2;
+}
+
+#endgame-modal{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 4fr 1fr;
+    background-color: rgb(48, 44, 44);
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    height: 30vh;
+    width: 50vw;
+    z-index: 3;
+    top: 35%;
+    left: 25%;
+    border-radius: 5%;
+    color: #e6e6e6;
+}
+
+#modal-text{
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    font-size: xx-large;
+}
+
+#modal-button-div{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    left: 30%;
+    height: 80%;
+    width: 40%;
+    background-color: gray;
+    border-radius: 8px;
+    transition: font-size 0.3s ease-in, scaleY 0.3s ease-in, scaleX 0.3s ease-in;
+}
+#modal-button-div:hover{
+    transform: scaleY(1.05);
+    transform: scaleX(1.05);
+    font-size: large;
+}

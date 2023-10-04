@@ -40,6 +40,9 @@ module.exports = class player {
                 shotRow = robotAttack[0];
                 shotColumn = robotAttack[1];
             }
+            if(opposingPlayer.showPlayerBoard().showBoard()[shotRow][shotColumn] === 2 || opposingPlayer.showPlayerBoard().showBoard()[shotRow][shotColumn] === -1){
+                return;
+            }
             opposingPlayer.showPlayerBoard().receiveAttack(shotRow, shotColumn);
             this.setTurn(false);
             if(opposingPlayer.showTurn() == false){

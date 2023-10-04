@@ -136,7 +136,71 @@ module.exports = class gameloop {
         };
     };
 
-    play = () => {
-        this.getPlayerArray[0].showPlayerBoard().placeShip(5,);
+    generateEndgameDOM = (winLoseBool) => {
+        let docBody = document.querySelector('body');
+        let greyout = document.createElement('div');
+        greyout.id = 'greyout';
+        docBody.appendChild(greyout);
+        let modal = document.createElement('div');
+        modal.id = 'endgame-modal';
+        docBody.appendChild(modal);
+        let modalText = document.createElement('div');
+        modalText.id = 'modal-text';
+        modal.appendChild(modalText);
+        let modalButtonDiv = document.createElement('div');
+        modalButtonDiv.id = 'modal-button-div';
+        modal.appendChild(modalButtonDiv);
+        let modalButton = document.createElement('div');
+        modalButton.id = 'modal-button';
+        modalButton.textContent = 'Play Again';
+        modalButtonDiv.appendChild(modalButton);
+        if(winLoseBool === false){
+            modalText.textContent = 'You Lose!';
+        }
+        if(winLoseBool === true){
+            modalText.textContent = 'You Win!';
+        }
+        modalButtonDiv.addEventListener('click', () => {
+            window.location.reload()
+        })
     }
+
+    attackDOM = () => {
+        
+        let attackBoard = document.querySelector('#attack-board');
+        let gameboardSquares = attackBoard.querySelectorAll('.gameboard-square');
+
+        
+        const proccessClick = async (e) => {
+            let rowAndCol = e.target.id.split('row-')[1].split('-column-');
+            let row = rowAndCol[0] - 1;
+            let col = rowAndCol[1] - 1;
+            this.getPlayerArray()[0].attack(this.getPlayerArray()[1], row, col);
+            this.updateDOM();
+            await new Promise(r => setTimeout(r, 1000));
+            if(this.getPlayerArray()[1].showTurn() === true && this.getPlayerArray()[0].showPlayerBoard().checkGameOver() === false && this.getPlayerArray()[1].showPlayerBoard().checkGameOver() === false){
+                console.log('bye')
+                this.getPlayerArray()[1].attack(this.getPlayerArray()[0]);
+                this.updateDOM();
+            }
+            if(this.getPlayerArray()[0].showPlayerBoard().checkGameOver() === true){
+                this.generateEndgameDOM(false);
+            }
+            if(this.getPlayerArray()[1].showPlayerBoard().checkGameOver() === true){
+                this.generateEndgameDOM(true);
+            }
+        }
+        
+        gameboardSquares.forEach(function(square){
+            square.addEventListener('click', proccessClick);
+        });
+
+    }
+
+    play = () => {
+        this.initializeDOM();
+        this.initializeDummyShipPlacement();
+        this.updateDOM();
+        this.attackDOM();
+    };
 };
