@@ -14,6 +14,189 @@ module.exports = class gameloop {
         return this.shipLengths;
     }
 
+    updateStartGameDOM = () => {
+        let startDefenseBoard = document.querySelector('#start-screen-defense-board');
+        let startDefenseBoardSquares = startDefenseBoard.querySelectorAll('.gameboard-square');
+        
+        for(let i=0; i<100; i++){
+            let rowNumber = ((i - (i % 10)) / 10);
+            let columnNumber = (i % 10);
+            if(this.getPlayerArray()[0].showPlayerBoard().showBoard()[rowNumber][columnNumber] === 1){
+                startDefenseBoardSquares[i].style.backgroundColor = 'green';
+            }
+            if(this.getPlayerArray()[0].showPlayerBoard().showBoard()[rowNumber][columnNumber] === 0 || this.getPlayerArray()[1].showPlayerBoard().showBoard()[rowNumber][columnNumber] === 1){
+                startDefenseBoardSquares[i].style.backgroundColor = 'aqua';
+            }
+        }
+
+    }
+
+    startGameScreen = (inputShipLength) => {
+
+        let body = document.querySelector('body');
+        let greyout = document.createElement('div');
+        greyout.id = 'greyout-start';
+        body.appendChild(greyout);
+        let startScreenTitle = document.createElement('div');
+        startScreenTitle.id = 'start-screen-title';
+        startScreenTitle.textContent = "Direct Your Fleet to Defense Positions!";
+        body.appendChild(startScreenTitle);
+        let startScreenBody = document.createElement('div');
+        startScreenBody.id = 'start-screen-body';
+        body.appendChild(startScreenBody);
+        let defenseBoardDiv = document.createElement('div');
+        defenseBoardDiv.id = 'start-screen-defense-board';
+        startScreenBody.appendChild(defenseBoardDiv);
+        let turnShipDiv = document.createElement('div');
+        turnShipDiv.id = 'turn-ship-div';
+        defenseBoardDiv.appendChild(turnShipDiv);
+        let turnButton = document.createElement('div');
+        turnButton.id = 'turn-button';
+        let turnButtonText = document.createElement('div');
+        turnButtonText.id = 'turn-button-text';
+        turnButtonText.textContent = 'Turn Ship';
+        turnButton.appendChild(turnButtonText);
+        turnShipDiv.appendChild(turnButton);
+        // make a var to store turn state
+        let turnState = 'up';
+        const getTurnState = () => {return turnState};
+        const setTurnState = (newDirection) => {turnState = newDirection;}
+        turnButton.addEventListener('click', () => {
+            if(getTurnState() === 'up'){
+                setTurnState('right');
+            }
+            else if(getTurnState() === 'right'){
+                setTurnState('down');
+            }
+            else if(getTurnState() === 'down'){
+                setTurnState('left');
+            }
+            else if(getTurnState() === 'left'){
+                setTurnState('up');
+            }
+        })
+        let boardDiv2 = document.createElement('div');
+        boardDiv2.id = 'start-defense-board';
+        boardDiv2.classList.add('gameboard');
+        defenseBoardDiv.appendChild(boardDiv2);
+        let boardRowArray2 = [];
+        // first entry will be row div followed by the ten child divs for that row
+        for(let i=0; i<11; i++){
+            boardRowArray2.push([])
+        }
+        for(let i=0; i<10; i++){
+            boardRowArray2[i][0] = document.createElement('div');
+            boardRowArray2[i][0].id = `start-defense-row-${i+1}`;
+            boardRowArray2[i][0].classList.add('row');
+            boardDiv2.appendChild(boardRowArray2[i][0]);
+            for(let j=1; j<11; j++){
+                boardRowArray2[i][j] = document.createElement('div');
+                boardRowArray2[i][j].id = `start-defense-row-${i+1}-column-${j}`;
+                boardRowArray2[i][j].classList.add('gameboard-square');
+                boardRowArray2[i][0].appendChild(boardRowArray2[i][j]);
+            }
+        }
+
+        // a listener to show where ships will be on defense board
+        let gameboardSquares = document.querySelectorAll('.gameboard-square');
+        var that = this;
+        gameboardSquares.forEach(function(square) {
+            square.addEventListener('mouseover', (e) => {
+                let rowAndCol = e.target.id.split('start-defense-row-')[1].split('-column-');
+                let row = rowAndCol[0] - 1;
+                let col = rowAndCol[1] - 1;
+                if(getTurnState() === 'up' && row + inputShipLength < 11){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row + i]
+                        let gameboardSquareDOM = gameboardRow.children[col];
+                        gameboardSquareDOM.style.backgroundColor = 'green';
+                    }
+                    e.target.addEventListener('click', () => {
+                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'up');
+                    })
+                }
+                if(getTurnState() === 'right' && col - inputShipLength > -2){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row];
+                        let gameboardSquareDOM = gameboardRow.children[col - i];
+                        gameboardSquareDOM.style.backgroundColor = 'green';
+                    }
+                    e.target.addEventListener('click', () => {
+                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'right');
+                    })
+                }
+                if(getTurnState() === 'down' && row - inputShipLength > -2){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row - i];
+                        let gameboardSquareDOM = gameboardRow.children[col];
+                        gameboardSquareDOM.style.backgroundColor = 'green';
+                    }
+                    e.target.addEventListener('click', () => {
+                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'down');
+                    })
+                }
+                if(getTurnState() === 'left' && col + inputShipLength < 11){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row];
+                        let gameboardSquareDOM = gameboardRow.children[col + i];
+                        gameboardSquareDOM.style.backgroundColor = 'green';
+                    }
+                    e.target.addEventListener('click', () => {
+                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'left');
+                    })
+                }
+            })
+            square.addEventListener('mouseleave', (e) => {
+                let rowAndCol = e.target.id.split('start-defense-row-')[1].split('-column-');
+                let row = rowAndCol[0] - 1;
+                let col = rowAndCol[1] - 1;
+                if(getTurnState() === 'up' && row + inputShipLength < 11){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row + i]
+                        let gameboardSquareDOM = gameboardRow.children[col];
+                        gameboardSquareDOM.style.backgroundColor = 'aqua';
+                    }
+                    e.target.removeEventListener('click', () => {
+                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'up');
+                    })
+                }
+                if(getTurnState() === 'right' && col - inputShipLength > -2){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row]
+                        let gameboardSquareDOM = gameboardRow.children[col - i];
+                        gameboardSquareDOM.style.backgroundColor = 'aqua';
+                    }
+                    e.target.removeEventListener('click', () => {
+                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'right');
+                    })
+                }
+                if(getTurnState() === 'down' && row - inputShipLength > -2){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row - i];
+                        let gameboardSquareDOM = gameboardRow.children[col];
+                        gameboardSquareDOM.style.backgroundColor = 'aqua';
+                    }
+                    e.target.removeEventListener('click', () => {
+                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'down');
+                    })
+                }
+                if(getTurnState() === 'left' && col + inputShipLength < 11){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row];
+                        let gameboardSquareDOM = gameboardRow.children[col + i];
+                        gameboardSquareDOM.style.backgroundColor = 'aqua';
+                    }
+                    e.target.removeEventListener('click', () => {
+                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'left');
+                    })
+                }
+            })
+        })
+
+
+
+    }
+
     initializeDOM = () => {
         let attackBoard = document.createElement('div');
         attackBoard.id = 'attack-div';
@@ -177,9 +360,8 @@ module.exports = class gameloop {
             let col = rowAndCol[1] - 1;
             this.getPlayerArray()[0].attack(this.getPlayerArray()[1], row, col);
             this.updateDOM();
-            await new Promise(r => setTimeout(r, 1000));
             if(this.getPlayerArray()[1].showTurn() === true && this.getPlayerArray()[0].showPlayerBoard().checkGameOver() === false && this.getPlayerArray()[1].showPlayerBoard().checkGameOver() === false){
-                console.log('bye')
+                await new Promise(r => setTimeout(r, 1000));
                 this.getPlayerArray()[1].attack(this.getPlayerArray()[0]);
                 this.updateDOM();
             }
@@ -198,9 +380,11 @@ module.exports = class gameloop {
     }
 
     play = () => {
-        this.initializeDOM();
-        this.initializeDummyShipPlacement();
-        this.updateDOM();
-        this.attackDOM();
+        this.startGameScreen(5);
+        this.updateStartGameDOM()
+        //this.initializeDOM();
+        //this.initializeDummyShipPlacement();
+        //this.updateDOM();
+        //this.attackDOM();
     };
 };

@@ -1,4 +1,4 @@
-* {
+*:not(iframe){
     margin: 0;
     padding: 0;
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
@@ -140,4 +140,78 @@ body{
     transform: scaleY(1.05);
     transform: scaleX(1.05);
     font-size: large;
+}
+
+#greyout-start{
+    display: grid;
+    grid-template-rows: 10vh 90vh;
+    background-color: gray;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    opacity: 80%;
+    z-index: 2;
+}
+
+#start-screen-title{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    font-size: xx-large;
+    color: #e6e6e6;
+    z-index: 3;
+}
+
+#start-screen-body{
+    display: grid;
+    grid-template-columns: 1fr;
+    height: 90vh;
+}
+
+#ship-yard{
+    display: grid;
+    grid-template-rows: 1fr 2fr;
+    justify-content: center;
+    align-items: center;
+}
+
+#turn-ship-div{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+#turn-button{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    color: #e6e6e6;
+    z-index: 3;
+}
+
+#turn-button-text{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    font-size: x-large;
+    border-style: solid;
+    border-color: #e6e6e6;
+    border-radius: 8px;
+    border-width: 1px;
+    padding: 24px;
+    transition: font-size 0.3s ease-out, scaleY 0.3s ease-out, scaleX 0.3s ease-out;
+}
+#turn-button-text:hover{
+    transform: scaleY(1.05);
+    transform: scaleX(1.05);
+    font-size: xx-large;
+}
+
+#start-screen-defense-board{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
 }
