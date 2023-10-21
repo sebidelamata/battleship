@@ -476,9 +476,5 @@ module.exports = class gameloop {
 
     play = () => {
         this.startGameScreen(this.getShipLengths()[this.getUnsetShips()]);
-        //this.initializeDOM();
-        //this.initializeDummyShipPlacement();
-        //this.updateDOM();
-        //this.attackDOM();
     };
 };
