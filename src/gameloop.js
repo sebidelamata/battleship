@@ -4,6 +4,7 @@ module.exports = class gameloop {
     constructor(){
         this.playerArray = [new player('human'), new player('robot')];
         this.shipLengths = [5, 4, 3, 3, 2];
+        this.unsetShips = this.shipLengths.length - 1;
     }
 
     getPlayerArray = () => {
@@ -14,10 +15,17 @@ module.exports = class gameloop {
         return this.shipLengths;
     }
 
+    getUnsetShips = () => {
+        return this.unsetShips;
+    }
+
+    setUnsetShips = () => {
+        this.unsetShips -= 1;
+    }
+
     updateStartGameDOM = () => {
         let startDefenseBoard = document.querySelector('#start-screen-defense-board');
         let startDefenseBoardSquares = startDefenseBoard.querySelectorAll('.gameboard-square');
-        
         for(let i=0; i<100; i++){
             let rowNumber = ((i - (i % 10)) / 10);
             let columnNumber = (i % 10);
@@ -97,100 +105,131 @@ module.exports = class gameloop {
             }
         }
 
+        // update to match player board
+        this.updateStartGameDOM()
+
+        // this adds the event handler that allows the click on the gameboard and gets added
+        // when the mouse hovers over the square if the square allows a placemnt for that direction
+        const gameSquareEventHandlerClick = (inputShipLength, row, col, direction) => {
+            this.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, direction);
+            this.setUnsetShips();
+            this.updateStartGameDOM();
+            // clean up body
+            let body = document.body;
+            let child = body.lastElementChild;  
+            while (child) { 
+                body.removeChild(child); 
+                child = body.lastElementChild; 
+                } 
+                if(this.getUnsetShips() >= 0){
+                   this.startGameScreen(this.getShipLengths()[this.getUnsetShips()]);
+                }
+                // if all of the ships have been set, start the game
+                if(this.getUnsetShips() < 0){
+                    this.initializeDOM();
+                    //this.initializeDummyShipPlacement();
+                    this.updateDOM();
+                    //this.attackDOM();
+                    }
+        }
+
+        // this is the event listener that handles when the mouse hovers over the square
+        // it checks if the ship would fit given the square direction and length of 
+        // ship, if it passes it allows the click function to be applied (from above)
+        const mouseHoverEventHandler = (e) => {
+            console.log('hi')
+            this.updateStartGameDOM();
+            let rowAndCol = e.target.id.split('start-defense-row-')[1].split('-column-');
+            let row = rowAndCol[0] - 1;
+            let col = rowAndCol[1] - 1;
+                if(getTurnState() === 'up' && row + inputShipLength < 11){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row + i]
+                        let gameboardSquareDOM = gameboardRow.children[col];
+                        gameboardSquareDOM.style.backgroundColor = 'green';
+                    }
+                }
+                if(getTurnState() === 'right' && col - inputShipLength > -2){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row];
+                        let gameboardSquareDOM = gameboardRow.children[col - i];
+                        gameboardSquareDOM.style.backgroundColor = 'green';
+                    }
+                }
+                if(getTurnState() === 'down' && row - inputShipLength > -2){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row - i];
+                        let gameboardSquareDOM = gameboardRow.children[col];
+                        gameboardSquareDOM.style.backgroundColor = 'green';
+                    }
+                }
+                if(getTurnState() === 'left' && col + inputShipLength < 11){
+                    for(let i=0; i<inputShipLength; i++){
+                        let gameboardRow = document.querySelector('.gameboard').children[row];
+                        let gameboardSquareDOM = gameboardRow.children[col + i];
+                        gameboardSquareDOM.style.backgroundColor = 'green';
+                    }
+                }
+        }
+
+        // determine if ship spots are available
+        const shipSpotsClean = (playerNumber, inputShipLength, row, col, direction) => {
+            let out = true;
+            if(direction == 'up'){
+                for(let i=0; i<inputShipLength;i++){
+                    if(this.getPlayerArray()[playerNumber].showPlayerBoard().showBoard()[row + i][col] === 1){
+                        out = false;
+                    }
+                }
+            }
+            if(direction == 'right'){
+                for(let i=0; i<inputShipLength;i++){
+                    if(this.getPlayerArray()[playerNumber].showPlayerBoard().showBoard()[row][col - i] === 1){
+                        out = false;
+                    }
+                }
+            }
+            if(direction == 'down'){
+                for(let i=0; i<inputShipLength;i++){
+                    if(this.getPlayerArray()[playerNumber].showPlayerBoard().showBoard()[row - i][col] === 1){
+                        out = false;
+                    }
+                }
+            }
+            if(direction == 'left'){
+                for(let i=0; i<inputShipLength;i++){
+                    if(this.getPlayerArray()[playerNumber].showPlayerBoard().showBoard()[row][col + i] === 1){
+                        out = false;
+                    }
+                }
+            }
+            return(out);
+        }
+
+        //separate click from hover
+        const mouseClickEventHandler = (e) => {
+            let rowAndCol = e.target.id.split('start-defense-row-')[1].split('-column-');
+            let row = rowAndCol[0] - 1;
+            let col = rowAndCol[1] - 1;
+            if(getTurnState() === 'up' && row + inputShipLength < 11 && shipSpotsClean(0, inputShipLength, row, col, 'up') === true){
+                gameSquareEventHandlerClick(inputShipLength, row, col, 'up');
+            }
+            if(getTurnState() === 'right' && col - inputShipLength > -2 && shipSpotsClean(0, inputShipLength, row, col, 'right') === true){
+                gameSquareEventHandlerClick(inputShipLength, row, col, 'right');
+            }
+            if(getTurnState() === 'down' && row - inputShipLength > -2 && shipSpotsClean(0, inputShipLength, row, col, 'down') === true){
+                gameSquareEventHandlerClick(inputShipLength, row, col, 'down');
+            }
+            if(getTurnState() === 'left' && col + inputShipLength < 11 && shipSpotsClean(0, inputShipLength, row, col, 'left') === true){
+                gameSquareEventHandlerClick(inputShipLength, row, col, 'left');
+            }
+        }
+
         // a listener to show where ships will be on defense board
         let gameboardSquares = document.querySelectorAll('.gameboard-square');
-        var that = this;
-        gameboardSquares.forEach(function(square) {
-            square.addEventListener('mouseover', (e) => {
-                let rowAndCol = e.target.id.split('start-defense-row-')[1].split('-column-');
-                let row = rowAndCol[0] - 1;
-                let col = rowAndCol[1] - 1;
-                if(getTurnState() === 'up' && row + inputShipLength < 11){
-                    for(let i=0; i<inputShipLength; i++){
-                        let gameboardRow = document.querySelector('.gameboard').children[row + i]
-                        let gameboardSquareDOM = gameboardRow.children[col];
-                        gameboardSquareDOM.style.backgroundColor = 'green';
-                    }
-                    e.target.addEventListener('click', () => {
-                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'up');
-                    })
-                }
-                if(getTurnState() === 'right' && col - inputShipLength > -2){
-                    for(let i=0; i<inputShipLength; i++){
-                        let gameboardRow = document.querySelector('.gameboard').children[row];
-                        let gameboardSquareDOM = gameboardRow.children[col - i];
-                        gameboardSquareDOM.style.backgroundColor = 'green';
-                    }
-                    e.target.addEventListener('click', () => {
-                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'right');
-                    })
-                }
-                if(getTurnState() === 'down' && row - inputShipLength > -2){
-                    for(let i=0; i<inputShipLength; i++){
-                        let gameboardRow = document.querySelector('.gameboard').children[row - i];
-                        let gameboardSquareDOM = gameboardRow.children[col];
-                        gameboardSquareDOM.style.backgroundColor = 'green';
-                    }
-                    e.target.addEventListener('click', () => {
-                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'down');
-                    })
-                }
-                if(getTurnState() === 'left' && col + inputShipLength < 11){
-                    for(let i=0; i<inputShipLength; i++){
-                        let gameboardRow = document.querySelector('.gameboard').children[row];
-                        let gameboardSquareDOM = gameboardRow.children[col + i];
-                        gameboardSquareDOM.style.backgroundColor = 'green';
-                    }
-                    e.target.addEventListener('click', () => {
-                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'left');
-                    })
-                }
-            })
-            square.addEventListener('mouseleave', (e) => {
-                let rowAndCol = e.target.id.split('start-defense-row-')[1].split('-column-');
-                let row = rowAndCol[0] - 1;
-                let col = rowAndCol[1] - 1;
-                if(getTurnState() === 'up' && row + inputShipLength < 11){
-                    for(let i=0; i<inputShipLength; i++){
-                        let gameboardRow = document.querySelector('.gameboard').children[row + i]
-                        let gameboardSquareDOM = gameboardRow.children[col];
-                        gameboardSquareDOM.style.backgroundColor = 'aqua';
-                    }
-                    e.target.removeEventListener('click', () => {
-                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'up');
-                    })
-                }
-                if(getTurnState() === 'right' && col - inputShipLength > -2){
-                    for(let i=0; i<inputShipLength; i++){
-                        let gameboardRow = document.querySelector('.gameboard').children[row]
-                        let gameboardSquareDOM = gameboardRow.children[col - i];
-                        gameboardSquareDOM.style.backgroundColor = 'aqua';
-                    }
-                    e.target.removeEventListener('click', () => {
-                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'right');
-                    })
-                }
-                if(getTurnState() === 'down' && row - inputShipLength > -2){
-                    for(let i=0; i<inputShipLength; i++){
-                        let gameboardRow = document.querySelector('.gameboard').children[row - i];
-                        let gameboardSquareDOM = gameboardRow.children[col];
-                        gameboardSquareDOM.style.backgroundColor = 'aqua';
-                    }
-                    e.target.removeEventListener('click', () => {
-                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'down');
-                    })
-                }
-                if(getTurnState() === 'left' && col + inputShipLength < 11){
-                    for(let i=0; i<inputShipLength; i++){
-                        let gameboardRow = document.querySelector('.gameboard').children[row];
-                        let gameboardSquareDOM = gameboardRow.children[col + i];
-                        gameboardSquareDOM.style.backgroundColor = 'aqua';
-                    }
-                    e.target.removeEventListener('click', () => {
-                        that.getPlayerArray()[0].showPlayerBoard().placeShip(inputShipLength, row, col, 'left');
-                    })
-                }
-            })
+        gameboardSquares.forEach((square) => {
+            square.addEventListener('mouseover', mouseHoverEventHandler)
+            square.addEventListener('click', mouseClickEventHandler)
         })
 
 
@@ -361,7 +400,7 @@ module.exports = class gameloop {
             this.getPlayerArray()[0].attack(this.getPlayerArray()[1], row, col);
             this.updateDOM();
             if(this.getPlayerArray()[1].showTurn() === true && this.getPlayerArray()[0].showPlayerBoard().checkGameOver() === false && this.getPlayerArray()[1].showPlayerBoard().checkGameOver() === false){
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 10000));
                 this.getPlayerArray()[1].attack(this.getPlayerArray()[0]);
                 this.updateDOM();
             }
@@ -380,8 +419,7 @@ module.exports = class gameloop {
     }
 
     play = () => {
-        this.startGameScreen(5);
-        this.updateStartGameDOM()
+        this.startGameScreen(this.getShipLengths()[this.getUnsetShips()]);
         //this.initializeDOM();
         //this.initializeDummyShipPlacement();
         //this.updateDOM();
