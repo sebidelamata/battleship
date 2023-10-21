@@ -127,9 +127,9 @@ module.exports = class gameloop {
                 // if all of the ships have been set, start the game
                 if(this.getUnsetShips() < 0){
                     this.initializeDOM();
-                    //this.initializeDummyShipPlacement();
+                    this.initializeRobotShipPlacement();
                     this.updateDOM();
-                    //this.attackDOM();
+                    this.attackDOM();
                     }
         }
 
@@ -137,7 +137,6 @@ module.exports = class gameloop {
         // it checks if the ship would fit given the square direction and length of 
         // ship, if it passes it allows the click function to be applied (from above)
         const mouseHoverEventHandler = (e) => {
-            console.log('hi')
             this.updateStartGameDOM();
             let rowAndCol = e.target.id.split('start-defense-row-')[1].split('-column-');
             let row = rowAndCol[0] - 1;
@@ -350,11 +349,68 @@ module.exports = class gameloop {
         }
     }
 
-    initializeDummyShipPlacement = () => {
-        for(let i=0; i<2; i++){
-            for(let j=0; j<this.getShipLengths().length; j++){
-                this.getPlayerArray()[i].showPlayerBoard().placeShip(this.getShipLengths()[j], 0, j, 'up');
-            };
+    initializeRobotShipPlacement = () => {
+        for(let i=0; i<this.getShipLengths().length; i++){
+            let shipLength = this.getShipLengths()[i]
+            let shipPlacementOkay = false;
+            let row = null;
+            let col = null;
+            let direction = null;
+            do{
+                row = Math.floor(Math.random() * 10);
+                col = Math.floor(Math.random() * 10);
+                direction = Math.floor(Math.random() * 4);
+                if(direction === 0){
+                    direction ='up';
+                    let spotsTaken = false
+                    for(let j=0; j<shipLength; j++){
+                        if(row + shipLength >= 11 || this.getPlayerArray()[1].showPlayerBoard().showBoard()[row + j][col] === 1){
+                            spotsTaken = true;
+                        }
+                    }
+                    if(spotsTaken === false){
+                        shipPlacementOkay = true;
+                    }
+
+                }
+                if(direction === 1){
+                    direction ='right';
+                    let spotsTaken = false
+                    for(let j=0; j<shipLength; j++){
+                        if(col - shipLength <= -2 || this.getPlayerArray()[1].showPlayerBoard().showBoard()[row][col - j] === 1){
+                            spotsTaken = true;
+                        }
+                    }
+                    if(spotsTaken === false){
+                        shipPlacementOkay = true;
+                    }
+                }
+                if(direction === 2){
+                    direction ='down';
+                    let spotsTaken = false
+                    for(let j=0; j<shipLength; j++){
+                        if(row - shipLength <= -2 || this.getPlayerArray()[1].showPlayerBoard().showBoard()[row - j][col] === 1){
+                            spotsTaken = true;
+                        }
+                    }
+                    if(spotsTaken === false){
+                        shipPlacementOkay = true;
+                    }
+                }
+                if(direction === 3){
+                    direction ='left';
+                    let spotsTaken = false
+                    for(let j=0; j<shipLength; j++){
+                        if(col + shipLength >= 11 || this.getPlayerArray()[1].showPlayerBoard().showBoard()[row][col + j] === 1){
+                            spotsTaken = true;
+                        }
+                    }
+                    if(spotsTaken === false){
+                        shipPlacementOkay = true;
+                    }
+                }
+            }while(shipPlacementOkay === false)
+            this.getPlayerArray()[1].showPlayerBoard().placeShip(this.getShipLengths()[i], row, col, direction);
         };
     };
 
@@ -400,7 +456,7 @@ module.exports = class gameloop {
             this.getPlayerArray()[0].attack(this.getPlayerArray()[1], row, col);
             this.updateDOM();
             if(this.getPlayerArray()[1].showTurn() === true && this.getPlayerArray()[0].showPlayerBoard().checkGameOver() === false && this.getPlayerArray()[1].showPlayerBoard().checkGameOver() === false){
-                await new Promise(r => setTimeout(r, 10000));
+                await new Promise(r => setTimeout(r, 500));
                 this.getPlayerArray()[1].attack(this.getPlayerArray()[0]);
                 this.updateDOM();
             }
